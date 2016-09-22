@@ -1,0 +1,41 @@
+{
+  "name": "stubon",
+  "version": "0.0.1",
+  "description": "stubon is simple dummy api server.",
+  "main": "index.js",
+  "bin": {
+    "stubon": "stubon.js"
+  },
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/putan/stubon.git"
+  },
+  "keywords": [
+    "stub",
+    "api",
+    "dummy",
+    "simple",
+    "server"
+  ],
+  "author": "putan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/putan/stubon/issues"
+  },
+  "homepage": "https://github.com/putan/stubon#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "deep-diff": "^0.3.4",
+    "express": "^4.14.0",
+    "glob": "^7.1.0",
+    "https": "^1.0.0",
+    "url": "^0.11.0",
+    "yamljs": "^0.2.8"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  }
+}
