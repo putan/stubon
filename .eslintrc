@@ -1,0 +1,22 @@
+{
+  extends: "airbnb",
+  rules: {
+    indent: ["error", 4],
+    key-spacing: ['error', {
+      beforeColon : true,
+      afterColon  : true,
+      align       : colon
+    }],
+    no-multi-spaces: ["error", {
+      exceptions: {
+        AssignmentExpression : true,
+        Property             : true,
+        ImportDeclaration    : true,
+        VariableDeclarator   : true
+      }
+    }],
+    no-use-before-define: ["error", {
+      functions : false
+    }]
+  }
+}
