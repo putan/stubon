@@ -14,6 +14,130 @@ const green = '\u001b[32m';
 const cyab  = '\u001b[36m';
 const reset = '\u001b[0m';
 
+//------------------------------------------------------------------------------
+// サポート関数
+//------------------------------------------------------------------------------
+const privates = {
+    /**
+     * リクエストパラメータの取得
+     *
+     * @param {object} req リクエストオブジェクト
+     * @return {object} リクエストパラメーターのオブジェクト
+     */
+    getParams : (req) => {
+        if (req.method === 'GET') {
+            return req.query;
+        }
+        return req.body;
+    },
+
+    /**
+     * 部分集合かチェック
+     * スタブ設定がリクエストの部分集合ならマッチとして使う
+     * （part ⊆ whole ならOK）
+     *
+     * @param {object} whole  含む方
+     * @param {object} part   含まれる方
+     * @return {boolean} 部分集合が成り立てばtrue
+     */
+    isSubsetObject : (whole, part) => {
+        const changes = deep.diff(whole, part) || [];
+        for (const change of changes) {
+            if (change.kind !== 'D') {
+                return false;
+            }
+        }
+        return true;
+    },
+
+    /**
+     * 渡された文字列がプレースホルダー部分かどうか
+     *
+     * @param {string} str
+     * @return {boolean}
+     */
+    isPlaceholder : str => (str.indexOf('{') === 0),
+
+    /**
+     * pathを比較する
+     *
+     * @param {string} stubPath スタブ設定のパス
+     * @param {string} reqPath  リクエストパス
+     * @return {array}
+     *   0 : {boolean} マッチしたか
+     *   1 : {object}  抜き出したルーティングパラメータのオブジェクト
+     */
+    isMatchingPathAndExtractParams : (stubPath, reqPath) => {
+        const stubDirs  = stubPath.split('/');
+        const reqDirs   = reqPath.split('/');
+        const reqParams = {};
+        let isMatch     = true;
+        if (stubDirs.length === reqDirs.length) {
+            for (const j of stubDirs.keys()) {
+                if (privates.isPlaceholder(stubDirs[j])) {
+                    reqParams[stubDirs[j].slice(1, -1)] = reqDirs[j];
+                } else if (stubDirs[j] !== reqDirs[j]) {
+                    isMatch = false;
+                    break;
+                }
+            }
+        } else {
+            isMatch = false;
+        }
+
+        return [isMatch, reqParams];
+    },
+
+    /**
+     * 指定ディレクトリから設定を読み込む
+     */
+    loadFiles : (directory) => {
+        const data = {};
+        let files;
+
+        files = glob.sync(`${directory}/*.yml`);
+        files.forEach((file) => {
+            const ymlData = yml.load(file);
+            Object.keys(ymlData).forEach(key => (
+                data[key] = !data[key]
+                    ? ymlData[key]
+                    : data[key].concat(ymlData[key])
+            ));
+        });
+
+        files = glob.sync(`${directory}/*.json`);
+        files.forEach((file) => {
+            const jsonData = JSON.parse(fs.readFileSync(file, 'utf-8'));
+            Object.keys(jsonData).forEach(key => (
+                data[key] = !data[key]
+                    ? jsonData[key]
+                    : data[key].concat(jsonData[key])
+            ));
+        });
+
+        return data;
+    },
+
+    // 出力系
+    outputJson : (res, data) => {
+        res.writeHead(data.status, { 'Content-Type' : 'application/json; charset=utf-8' });
+        res.end(JSON.stringify(data.body));
+    },
+
+    outputNotFound : (res) => {
+        res.writeHead(404);
+        res.end('Not Found');
+    },
+
+    outputError : (res) => {
+        res.writeHead(500);
+        res.end('Server Error!');
+    },
+};
+
+//------------------------------------------------------------------------------
+// メイン
+//------------------------------------------------------------------------------
 /**
  * Stubon
  *
@@ -22,7 +146,7 @@ const reset = '\u001b[0m';
  * @prop {boolean} debug デバッグモードフラグ
  * @prop {boolean} ssl   SSLモードフラグ
  */
-export default class Stubon {
+class Stubon {
 
     /**
      * コンストラクタ
@@ -35,7 +159,7 @@ export default class Stubon {
     constructor(directory, options) {
         this.debug = options.debug || false;
         this.ssl   = options.ssl || false;
-        this.stubs = loadFiles(directory);
+        this.stubs = privates.loadFiles(directory);
         this.app   = express();
     }
 
@@ -75,6 +199,14 @@ export default class Stubon {
      * @param {object} res レスポンスオブジェクト
      */
     router(req, res) {
+        const {
+            getParams,
+            isMatchingPathAndExtractParams,
+            isSubsetObject,
+            outputJson,
+            outputNotFound,
+            outputError,
+        } = privates;
         try {
             const reqPath    = decodeURI(url.parse(req.url).pathname);
             const reqQueries = getParams(req);
@@ -89,7 +221,8 @@ export default class Stubon {
             for (const stubPath of Object.keys(this.stubs)) {
                 // パスを比較
                 this.log(`compare to "${stubPath}"`, true);
-                const [isMatch, reqParams] = isMatchingPathAndExtractParams(stubPath, reqPath);
+                const [isMatch, reqParams] =
+                    isMatchingPathAndExtractParams(stubPath, reqPath);
                 if (isMatch) {
                     this.log('path is matched.', true);
                     for (const i of this.stubs[stubPath].keys()) {
@@ -134,123 +267,5 @@ export default class Stubon {
     }
 }
 
-//------------------------------------------------------------------------------
-// サポート関数
-//------------------------------------------------------------------------------
-/**
- * リクエストパラメータの取得
- *
- * @param {object} req リクエストオブジェクト
- * @return {object} リクエストパラメーターのオブジェクト
- */
-function getParams(req) {
-    if (req.method === 'GET') {
-        return req.query;
-    }
-    return req.body;
-}
-
-/**
- * 部分集合かチェック
- * スタブ設定がリクエストの部分集合ならマッチとして使う
- * （part ⊆ whole ならOK）
- *
- * @param {object} whole  含む方
- * @param {object} part   含まれる方
- * @return {boolean} 部分集合が成り立てばtrue
- */
-function isSubsetObject(whole, part) {
-    const changes = deep.diff(whole, part) || [];
-    for (const change of changes) {
-        if (change.kind !== 'D') {
-            return false;
-        }
-    }
-    return true;
-}
-
-/**
- * 渡された文字列がプレースホルダー部分かどうか
- *
- * @param {string} str
- * @return {boolean}
- */
-function isPlaceholder(str) {
-    return str.indexOf('{') === 0;
-}
-
-/**
- * pathを比較する
- *
- * @param {string} stubPath スタブ設定のパス
- * @param {string} reqPath  リクエストパス
- * @return {array}
- *   0 : {boolean} マッチしたか
- *   1 : {object}  抜き出したルーティングパラメータのオブジェクト
- */
-function isMatchingPathAndExtractParams(stubPath, reqPath) {
-    const stubDirs  = stubPath.split('/');
-    const reqDirs   = reqPath.split('/');
-    const reqParams = {};
-    let isMatch     = true;
-    if (stubDirs.length === reqDirs.length) {
-        for (const j of stubDirs.keys()) {
-            if (isPlaceholder(stubDirs[j])) {
-                reqParams[stubDirs[j].slice(1, -1)] = reqDirs[j];
-            } else if (stubDirs[j] !== reqDirs[j]) {
-                isMatch = false;
-                break;
-            }
-        }
-    } else {
-        isMatch = false;
-    }
-
-    return [isMatch, reqParams];
-}
-
-/**
- * 指定ディレクトリから設定を読み込む
- */
-function loadFiles(directory) {
-    const data = {};
-    let files;
-
-    files = glob.sync(`${directory}/*.yml`);
-    files.forEach((file) => {
-        const ymlData = yml.load(file);
-        Object.keys(ymlData).forEach(key => (
-            data[key] = !data[key]
-                ? ymlData[key]
-                : data[key].concat(ymlData[key])
-        ));
-    });
-
-    files = glob.sync(`${directory}/*.json`);
-    files.forEach((file) => {
-        const jsonData = JSON.parse(fs.readFileSync(file, 'utf-8'));
-        Object.keys(jsonData).forEach(key => (
-            data[key] = !data[key]
-                ? jsonData[key]
-                : data[key].concat(jsonData[key])
-        ));
-    });
-
-    return data;
-}
-
-// 出力系
-function outputJson(response, data) {
-    response.writeHead(data.status, { 'Content-Type' : 'application/json; charset=utf-8' });
-    response.end(JSON.stringify(data.body));
-}
-
-function outputNotFound(response) {
-    response.writeHead(404);
-    response.end('Not Found');
-}
-
-function outputError(response) {
-    response.writeHead(500);
-    response.end('Server Error!');
-}
+export { privates };
+export default Stubon;
