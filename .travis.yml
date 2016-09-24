@@ -4,3 +4,6 @@ node_js:
   - "5"
   - "4"
   - "4.5.0"
+script: npm test
+install:
+  - npm install
