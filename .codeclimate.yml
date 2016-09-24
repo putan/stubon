@@ -1,0 +1,9 @@
+engines: 
+  eslint:
+    enabled: true
+    config:
+      config: path/to/.eslintrc
+    
+ratings:
+  paths:
+    - "/src/stubon.js"
