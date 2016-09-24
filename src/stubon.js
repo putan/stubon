@@ -80,12 +80,12 @@ export default class Stubon {
             const reqQueries = getParams(req);
 
             this.log([
-                {path   : reqPath},
-                {method : req.method},
-                {query  : reqQueries},
-                {header : JSON.stringify(req.headers)},
+                { path : reqPath },
+                { method : req.method },
+                { query : reqQueries },
+                { header : JSON.stringify(req.headers) },
             ], true);
-    
+
             for (const stubPath of Object.keys(this.stubs)) {
                 // パスを比較
                 this.log(`compare to "${stubPath}"`, true);
@@ -124,11 +124,11 @@ export default class Stubon {
     /**
      * ロガー
      *
-     * @param {string}  msg        ログメッセージ
-     * @param {boolean} isDebugLog デバッグログか。trueならdebugモード時のみ出力
+     * @param {string}  msg                ログメッセージ
+     * @param {boolean} [isDebugLog=false] デバッグログか。trueならdebugモード時のみ出力
      */
     log(msg, isDebugLog = false) {
-        if (isDebugLog && this.debug || !isDebugLog) {
+        if ((isDebugLog && this.debug) || !isDebugLog) {
             console.log(msg);
         }
     }
