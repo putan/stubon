@@ -1,7 +1,7 @@
 import gulp from 'gulp';
 import Stubon from '../stubon/index';
 gulp.task('stubon', () => {
-    var stubon = new Stubon('./test/src', {
+    var stubon = new Stubon('./test/sample', {
         debug : true,
         ssl   : true,
     });

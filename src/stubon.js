@@ -70,14 +70,15 @@ const privates = {
     isMatchingPathAndExtractParams : (stubPath, reqPath) => {
         const stubDirs  = stubPath.split('/');
         const reqDirs   = reqPath.split('/');
-        const reqParams = {};
+        let reqParams   = {};
         let isMatch     = true;
         if (stubDirs.length === reqDirs.length) {
             for (const j of stubDirs.keys()) {
                 if (privates.isPlaceholder(stubDirs[j])) {
                     reqParams[stubDirs[j].slice(1, -1)] = reqDirs[j];
                 } else if (stubDirs[j] !== reqDirs[j]) {
-                    isMatch = false;
+                    isMatch   = false;
+                    reqParams = {};
                     break;
                 }
             }
@@ -93,26 +94,27 @@ const privates = {
      */
     loadFiles : (directory) => {
         const data = {};
-        let files;
 
-        files = glob.sync(`${directory}/*.yml`);
-        files.forEach((file) => {
-            const ymlData = yml.load(file);
-            Object.keys(ymlData).forEach(key => (
-                data[key] = !data[key]
-                    ? ymlData[key]
-                    : data[key].concat(ymlData[key])
-            ));
-        });
-
-        files = glob.sync(`${directory}/*.json`);
-        files.forEach((file) => {
-            const jsonData = JSON.parse(fs.readFileSync(file, 'utf-8'));
-            Object.keys(jsonData).forEach(key => (
-                data[key] = !data[key]
-                    ? jsonData[key]
-                    : data[key].concat(jsonData[key])
-            ));
+        [
+            // YAML
+            {
+                extension : 'yml',
+                parse     : file => yml.load(file),
+            },
+            // JSON
+            {
+                extension : 'json',
+                parse     : file => JSON.parse(fs.readFileSync(file, 'utf-8')),
+            },
+        ].forEach((typeInfo) => {
+            const files = glob.sync(`${directory}/*.${typeInfo.extension}`);
+            files.forEach((file) => {
+                data[file] = {};
+                const parsed = typeInfo.parse(file);
+                Object.keys(parsed).forEach((key) => {
+                    data[file][key] = parsed[key];
+                });
+            });
         });
 
         return data;
@@ -156,7 +158,7 @@ class Stubon {
      * @param {boolean} [options.debug=false] ログを多めに出すモード
      * @param {boolean} [options.ssl=false]   sslにするモード
      */
-    constructor(directory, options) {
+    constructor(directory, options = {}) {
         this.debug = options.debug || false;
         this.ssl   = options.ssl || false;
         this.stubs = privates.loadFiles(directory);
@@ -218,29 +220,32 @@ class Stubon {
                 { header : JSON.stringify(req.headers) },
             ], true);
 
-            for (const stubPath of Object.keys(this.stubs)) {
-                // パスを比較
-                this.log(`compare to "${stubPath}"`, true);
-                const [isMatch, reqParams] =
-                    isMatchingPathAndExtractParams(stubPath, reqPath);
-                if (isMatch) {
-                    this.log('path is matched.', true);
-                    for (const i of this.stubs[stubPath].keys()) {
-                        this.log(`compare to [${i}]`, true);
-                        const exp = this.stubs[stubPath][i].request;
+            for (const file of Object.keys(this.stubs)) {
+                this.log(`file: ${file}`, true);
+                for (const stubPath of Object.keys(this.stubs[file])) {
+                    // パスを比較
+                    this.log(`  path: ${stubPath}`, true);
+                    const [isMatch, reqParams] =
+                        isMatchingPathAndExtractParams(stubPath, reqPath);
+                    if (isMatch) {
+                        this.log('  matched.', true);
+                        for (const i of this.stubs[file][stubPath].keys()) {
+                            this.log(`    index: ${i}`, true);
+                            const exp = this.stubs[file][stubPath][i].request;
 
-                        // パラメーターを比較
-                        if ((!exp.method || exp.method === req.method)
-                            && (!exp.params || isSubsetObject(reqParams, exp.params))
-                            && (!exp.queries || isSubsetObject(reqQueries, exp.queries))
-                            && (!exp.headers || isSubsetObject(req.headers, exp.headers))
-                        ) {
-                            this.log(`>> ${green}match!${reset} ${stubPath}[${i}]`);
-                            const response = this.stubs[stubPath][i].response;
-                            const options  = this.stubs[stubPath][i].options || {};
-                            const lagSec   = parseInt(options.lagSec, 10) || 0;
-                            setTimeout(() => outputJson(res, response), lagSec * 1000);
-                            return;
+                            // パラメーターを比較
+                            if ((!exp.method || exp.method === req.method)
+                                && (!exp.params || isSubsetObject(reqParams, exp.params))
+                                && (!exp.queries || isSubsetObject(reqQueries, exp.queries))
+                                && (!exp.headers || isSubsetObject(req.headers, exp.headers))
+                            ) {
+                                this.log(`>> ${green}match!${reset} ${file} ${stubPath} [${i}]`);
+                                const response = this.stubs[file][stubPath][i].response;
+                                const options  = this.stubs[file][stubPath][i].options || {};
+                                const lagSec   = parseInt(options.lagSec, 10) || 0;
+                                setTimeout(() => outputJson(res, response), lagSec * 1000);
+                                return;
+                            }
                         }
                     }
                 }

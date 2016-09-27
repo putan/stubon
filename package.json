@@ -7,7 +7,7 @@
     "stubon": "stubon.js"
   },
   "scripts": {
-    "test": "eslint src/ && mocha --compilers js:babel-core/register test/stubon.js",
+    "test": "eslint src/ && istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- --timeout 5000 --compilers js:babel-core/register --reporter spec test/",
     "build": "babel src/stubon.js --out-file lib/stubon.js",
     "watch:test": "chokidar 'src/*.js' -c 'npm test'",
     "watch:build": "chokidar 'src/*.js' -c 'npm run build'",
@@ -48,13 +48,18 @@
     "browserify": "^13.1.0",
     "chai": "^3.5.0",
     "chokidar-cli": "^1.2.0",
+    "coveralls": "^2.11.14",
     "eslint": "^3.6.0",
     "eslint-config-airbnb": "^11.1.0",
     "eslint-plugin-import": "^1.16.0",
     "eslint-plugin-jsx-a11y": "^2.2.2",
     "eslint-plugin-react": "^6.3.0",
     "gulp": "^3.9.1",
+    "istanbul": "^1.0.0-alpha.2",
     "mocha": "^3.0.2",
+    "mocha-lcov-reporter": "^1.2.0",
+    "node-fetch": "^1.6.3",
+    "sinon": "^1.17.6",
     "vinyl-source-stream": "^1.1.0"
   }
 }
