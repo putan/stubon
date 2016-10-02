@@ -1,7 +1,5 @@
 import { expect } from 'chai';
 import Stubon, { privates } from '../src/stubon';
-import fetch from 'node-fetch';
-import https from 'https';
 
 describe('src/stubon.js privates.getParams', () => {
     const dummyRequestObject = {
@@ -10,11 +8,11 @@ describe('src/stubon.js privates.getParams', () => {
         body   : 'body',
     };
     const dataProvider = {
-        'getの時はqueryから' : {
+        'getting from query: called by method "GET"' : {
             method   : 'GET',
             expected : 'query',
         },
-        'get以外の時はbodyから' : {
+        'getting from body: called by methods excepting "GET"' : {
             method   : 'POST',
             expected : 'body',
         },
@@ -101,7 +99,7 @@ describe('src/stubon.js privates.isPlaceholder', () => {
 
 describe('src/stubon.js privates.isMatchingPathAndExtractParams', () => {
     const dataProvider = {
-        '一致、パラメータなし' : {
+        'matching.' : {
             stubPath : '/hoge/fuga/get',
             reqPath  : '/hoge/fuga/get',
             expected : {
@@ -109,7 +107,7 @@ describe('src/stubon.js privates.isMatchingPathAndExtractParams', () => {
                 reqParams : {},
             },
         },
-        '一致、パラメータ1つ' : {
+        'matching with a routing parameter.' : {
             stubPath : '/hoge/{id}/get',
             reqPath  : '/hoge/1000/get',
             expected : {
@@ -119,7 +117,7 @@ describe('src/stubon.js privates.isMatchingPathAndExtractParams', () => {
                 },
             },
         },
-        '一致、パラメータたくさん' : {
+        'matching with routing paramters.' : {
             stubPath : '/{lang}/hoge/{hogeId}/fuga/{fugaId}/get',
             reqPath  : '/ja/hoge/1000/fuga/2000/get',
             expected : {
@@ -131,7 +129,7 @@ describe('src/stubon.js privates.isMatchingPathAndExtractParams', () => {
                 },
             },
         },
-        '一致しない、階層数が違う' : {
+        'no matching by a difference in directory hierarchies.' : {
             stubPath : '/hoge/fuga/get',
             reqPath  : '/hoge/get',
             expected : {
@@ -139,15 +137,15 @@ describe('src/stubon.js privates.isMatchingPathAndExtractParams', () => {
                 reqParams : {},
             },
         },
-        '一致しない、階層数は同じ' : {
+        'no matching by a difference in directories.' : {
             stubPath : '/hoge/fuga/get',
-            reqPath  : '/hoge/fuga/post',
+            reqPath  : '/hoge/piyo/get',
             expected : {
                 isMatch   : false,
                 reqParams : {},
             },
         },
-        '一致しない、パラメータ部分までは一致するが最後が違う' : {
+        'no matching by a differenc in a end of path.' : {
             stubPath : '/hoge/{id}/get',
             reqPath  : '/hoge/1000/post',
             expected : {
@@ -170,7 +168,7 @@ describe('src/stubon.js privates.isMatchingPathAndExtractParams', () => {
 
 describe('src/stubon.js privates.loadFiles', () => {
     const dataProvider = {
-        'スタブファイルが意図通り読み込まれる' : {
+        'load files' : {
             dir      : './test/stub/',
             expected : {
                 "./test/stub/data.json": {
@@ -213,93 +211,5 @@ describe('src/stubon.js privates.loadFiles', () => {
             const actual = privates.loadFiles(data.dir);
             expect(actual).to.eql(data.expected);
         });
-    });
-});
-
-describe('src/stubon.js Stubon', () => {
-    const stubon = new Stubon('./test/sample');
-    const app = stubon.server().listen(8081);
-    const hostname = 'http://localhost:8081';
-
-    it('can GET', (done) => {
-        fetch(`${hostname}/test/get/1`)
-            .then(res => res.json())
-            .then(json => {
-                expect(json.result).to.be.equal('OK!');
-                done();
-            });
-    });
-
-    it('can POST', (done) => {
-        fetch(`${hostname}/test/post/1`, {
-            method  : 'POST',
-        })
-            .then(res => res.json())
-            .then(json => {
-                expect(json.result).to.be.equal('OK! POST!');
-                done();
-            });
-    });
-
-    it('parameter match', (done) => {
-        fetch(`${hostname}/test/get/999`)
-            .then(res => res.json())
-            .then(json => {
-                expect(json.result).to.be.equal('OK! param!');
-                done();
-            });
-    });
-
-    it('query match', (done) => {
-        fetch(`${hostname}/test/get/1?hoge=a`)
-            .then(res => res.json())
-            .then(json => {
-                expect(json.result).to.be.equal('OK! query!');
-                done();
-            });
-    });
-
-    it('header match', (done) => {
-        fetch(`${hostname}/test/post/1`, {
-            method : 'POST',
-            headers : { 'x-method' : 'PUT' },
-        })
-            .then(res => res.json())
-            .then(json => {
-                expect(json.result).to.be.equal('OK! header!');
-                done();
-            });
-    });
-
-    it('wait', (done) => {
-        const start = new Date();
-        fetch(`${hostname}/test/get/1?wait=wait`)
-            .then(res => res.json())
-            .then(json => {
-                const end = new Date();
-                expect(json.result).to.be.equal('OK! wait!');
-                expect(end - start).to.be.above(1000);
-                app.close();
-                done();
-            });
-    });
-
-});
-
-describe('src/stubon.js Stubon ssl&debug', () => {
-    it('ssl', (done) => {
-        const stubon = new Stubon('./test/sample', {
-            ssl   : true,
-            debug : true,
-        });
-        const app = stubon.server().listen(8082);
-        const hostname = 'https://localhost:8082';
-        fetch(`${hostname}/test/get/1`, { agent : new https.Agent({ rejectUnauthorized : false })})
-            .then(res => res.json())
-            .then(json => {
-                expect(json.result).to.be.equal('OK!');
-                app.close();
-                done();
-            });
     });
 });
