@@ -1,2 +1,4 @@
 /lib/
 !/lib/.gitkeep
+/coverage
+/node_modules
