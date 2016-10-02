@@ -8,4 +8,4 @@ script: npm test
 install:
   - npm install
 after_success:
-  - coveralls
+  - npm run coveralls

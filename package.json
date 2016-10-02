@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "eslint src/ && istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- --timeout 5000 --compilers js:babel-core/register --reporter spec test/",
+    "coveralls": "cat coverage/lcov.info | node_modules/coveralls/bin/coveralls.js",
     "build": "babel src/stubon.js --out-file lib/stubon.js",
     "watch:test": "chokidar 'src/*.js' -c 'npm test'",
     "watch:build": "chokidar 'src/*.js' -c 'npm run build'",
