@@ -1,3 +1,10 @@
 src/
 test/
+coverage/
 gulpfile.babel.js
+.babelrc
+.codeclimate.yml
+.coveralls.yml
+.eslintrc
+.npmignore
+.travis.yml
