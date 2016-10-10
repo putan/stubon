@@ -4,7 +4,7 @@
   "description": "stubon is simple dummy api server.",
   "main": "index.js",
   "bin": {
-    "stubon": "stubon.js"
+    "stubon": "bin/stubon"
   },
   "scripts": {
     "test": "eslint src/ && istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- --timeout 5000 --compilers js:babel-core/register --reporter spec test/",
@@ -32,6 +32,7 @@
   },
   "homepage": "https://github.com/putan/stubon#readme",
   "dependencies": {
+    "argv": "0.0.2",
     "body-parser": "^1.15.2",
     "deep-diff": "^0.3.4",
     "express": "^4.14.0",
