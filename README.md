@@ -11,10 +11,10 @@ $ npm i stubon
 
 ## 1. Make source file by JSON or YAML or both.
 When "http request" includes all condition that written under "request", value returned that under correspond "response.body".
+[Sample is here](https://github.com/putan/stubon/blob/master/test/sample/stub.yml).
 
 ```js
 // ./dev/src/dummy.yml
-
 '/aaa/get':
     -
         request:
@@ -54,7 +54,6 @@ When you call fron browser, you can do permission setting on the browser side.
 
 ```js
 // call_api.js
-
 fetch('https://localhost:8080/aaa/get', {
     agent : new https.Agent({ rejectUnauthorized : false }),
 })

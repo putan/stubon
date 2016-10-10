@@ -1,10 +1,10 @@
 {
   "name": "stubon",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "stubon is simple dummy api server.",
   "main": "index.js",
   "bin": {
-    "stubon": "bin/stubon"
+    "stubon": "bin/stubon.js"
   },
   "scripts": {
     "test": "eslint src/ && istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- --timeout 5000 --compilers js:babel-core/register --reporter spec test/",
@@ -12,7 +12,8 @@
     "build": "babel src/stubon.js --out-file lib/stubon.js",
     "watch:test": "chokidar 'src/*.js' -c 'npm test'",
     "watch:build": "chokidar 'src/*.js' -c 'npm run build'",
-    "start": "npm run watch:test & npm run watch:build"
+    "start": "npm run watch:test & npm run watch:build",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
