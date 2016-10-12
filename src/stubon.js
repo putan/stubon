@@ -7,6 +7,7 @@ import yml  from 'yamljs';
 import express    from 'express';
 import https      from 'https';
 import bodyParser from 'body-parser';
+import cors       from 'cors';
 
 // ログ用
 const red   = '\u001b[31m';
@@ -173,11 +174,8 @@ class Stubon {
         this.app.use(bodyParser.urlencoded({ extended : true }));
         this.app.use(bodyParser.json());
 
-        this.app.use((req, res, next) => {
-            res.header('Access-Control-Allow-Origin', '*');
-            res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-            next();
-        });
+        // クロスオリジンを許可する設定
+        this.app.use(cors());
 
         // HTTPリクエストを受けて、レスポンスを返すところ
         this.app.all('*', (req, res) => {
