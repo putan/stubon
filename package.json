@@ -1,6 +1,6 @@
 {
   "name": "stubon",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "stubon is simple dummy api server.",
   "main": "index.js",
   "bin": {
@@ -35,6 +35,7 @@
   "dependencies": {
     "argv": "0.0.2",
     "body-parser": "^1.15.2",
+    "cors": "^2.8.1",
     "deep-diff": "^0.3.4",
     "express": "^4.14.0",
     "glob": "^7.1.0",
