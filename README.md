@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/putan/stubon.svg?branch=master)](https://travis-ci.org/putan/stubon) [![Coverage Status](https://coveralls.io/repos/github/putan/stubon/badge.svg?branch=master)](https://coveralls.io/github/putan/stubon?branch=master)
+[![Build Status](https://travis-ci.org/putan/stubon.svg?branch=master)](https://travis-ci.org/putan/stubon) [![Coverage Status](https://coveralls.io/repos/github/putan/stubon/badge.svg?branch=master)](https://coveralls.io/github/putan/stubon?branch=master) [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://github.com/putan/stubon/blob/master/LICENSE.txt)
 
 # Stubon
 
