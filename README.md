@@ -6,7 +6,7 @@ stubon is simple dummy api server.
 
 ## 0. install
 ```shell
-$ npm i stubon
+$ npm i -D stubon
 ```
 
 ## 1. Make source file by JSON or YAML or both.
@@ -50,7 +50,7 @@ $ open https://localhost:8080/aaa/get
 ```
 
 If you call API from node script, you need setting option 'agent'.<br>
-When you call fron browser, you can do permission setting on the browser side.
+When you call from browser, you can do permission setting on the browser side.
 
 ```js
 // call_api.js
