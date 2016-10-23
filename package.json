@@ -1,6 +1,6 @@
 {
   "name": "stubon",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "stubon is simple dummy api server.",
   "main": "index.js",
   "bin": {
@@ -53,10 +53,10 @@
     "chai": "^3.5.0",
     "chokidar-cli": "^1.2.0",
     "coveralls": "^2.11.14",
-    "eslint": "^3.6.0",
-    "eslint-config-airbnb": "^11.1.0",
+    "eslint": "^3.8.1",
+    "eslint-config-airbnb": "^12.0.0",
     "eslint-plugin-import": "^1.16.0",
-    "eslint-plugin-jsx-a11y": "^2.2.2",
+    "eslint-plugin-jsx-a11y": "^2.2.3",
     "eslint-plugin-react": "^6.3.0",
     "gulp": "^3.9.1",
     "istanbul": "^1.0.0-alpha.2",
