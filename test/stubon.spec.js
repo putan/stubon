@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import Stubon, { privates } from '../src/stubon';
 import fetch from 'node-fetch';
 import https from 'https';
+import sinon from 'sinon';
 
 describe('src/stubon.js Stubon', () => {
 
@@ -83,9 +84,27 @@ describe('src/stubon.js Stubon', () => {
                 done();
             });
     });
-});
 
-describe('src/stubon.js Stubon ssl&debug', () => {
+    it('error', (done) => {
+        const stub = sinon.stub(privates, 'getParams').callsFake(
+            () => { throw new Error('dummy error'); }
+        );
+        const stubon = new Stubon('./test/stub');
+        const app = stubon.server().listen(8083);
+        const hostname = 'http://localhost:8083';
+        fetch(`${hostname}/test/get/1`)
+            .then(res => {
+                expect(res.status).to.be.equal(500)
+                return res.text();
+            })
+            .then(text => {
+                expect(text).to.be.equal('Server Error!');
+                app.close();
+                stub.restore();
+                done();
+            });
+    });
+
     it('ssl', (done) => {
         const stubon = new Stubon('./test/stub', {
             ssl   : true,
