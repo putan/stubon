@@ -3,6 +3,7 @@ import fs   from 'fs';
 import glob from 'glob';
 import url  from 'url';
 import yml  from 'yamljs';
+import chokidar from 'chokidar';
 
 import express    from 'express';
 import https      from 'https';
@@ -139,50 +140,58 @@ const privates = {
 };
 
 //------------------------------------------------------------------------------
-// メイン
+// main
 //------------------------------------------------------------------------------
 /**
  * Stubon
  *
- * @prop {object}  app   expressオブジェクト
- * @prop {object}  stubs スタブ設定のオブジェクト
- * @prop {boolean} debug デバッグモードフラグ
- * @prop {boolean} ssl   SSLモードフラグ
+ * @prop {object}  app   express object
+ * @prop {object}  stubs stub setting object
+ * @prop {boolean} debug detailed log flag
+ * @prop {boolean} ssl   ssl flag
  */
 class Stubon {
 
     /**
-     * コンストラクタ
+     * constructor
      *
-     * @param {string}  directory スタブ設定ファイルの置き場所
+     * @param {string}  directory             setting file directory
      * @param {object}  options
-     * @param {boolean} [options.debug=false] ログを多めに出すモード
-     * @param {boolean} [options.ssl=false]   sslにするモード
+     * @param {boolean} [options.debug=false] detailed log flag
+     * @param {boolean} [options.ssl=false]   https mode
      */
     constructor(directory, options = {}) {
         this.debug = options.debug || false;
         this.ssl   = options.ssl || false;
         this.stubs = privates.loadFiles(directory);
         this.app   = express();
+
+        // watch files
+        chokidar.watch(directory, { persistent : true })
+            .on('change', () => {
+                this.log('\n----- stub files changed -----');
+                this.stubs = privates.loadFiles(directory);
+            });
     }
 
     /**
-     * サーバー起動
+     * start server
      */
     server() {
-        // postのデータを受け取れるようにする設定
+        // to be able to receive request params on POST method.
         this.app.use(bodyParser.urlencoded({ extended : true }));
         this.app.use(bodyParser.json());
 
-        // クロスオリジンを許可する設定
+        // allow cors
         this.app.use(cors());
 
-        // HTTPリクエストを受けて、レスポンスを返すところ
+        // set routing
         this.app.all('*', (req, res) => {
             this.log('\n----- recieve request -----');
             this.router(req, res);
         });
 
+        // set ssl (optional)
         if (this.ssl) {
             this.app = https.createServer({
                 key  : fs.readFileSync(`${__dirname}/../ssl/server.key`),
@@ -194,10 +203,10 @@ class Stubon {
     }
 
     /**
-     * ルーター
+     * router
      *
-     * @param {object} req リクエストオブジェクト
-     * @param {object} res レスポンスオブジェクト
+     * @param {object} req request object
+     * @param {object} res respons object
      */
     router(req, res) {
         const {
@@ -222,7 +231,7 @@ class Stubon {
             for (const file of Object.keys(this.stubs)) {
                 this.log(`file: ${file}`, true);
                 for (const stubPath of Object.keys(this.stubs[file])) {
-                    // パスを比較
+                    // check path
                     this.log(`  path: ${stubPath}`, true);
                     const [isMatch, reqParams] =
                         isMatchingPathAndExtractParams(stubPath, reqPath);
@@ -232,7 +241,7 @@ class Stubon {
                             this.log(`    index: ${i}`, true);
                             const exp = this.stubs[file][stubPath][i].request;
 
-                            // パラメーターを比較
+                            // check params
                             if ((!exp.method || exp.method === req.method)
                                 && (!exp.params || isSubsetObject(reqParams, exp.params))
                                 && (!exp.queries || isSubsetObject(reqQueries, exp.queries))
@@ -259,10 +268,10 @@ class Stubon {
     }
 
     /**
-     * ロガー
+     * logger
      *
-     * @param {string}  msg                ログメッセージ
-     * @param {boolean} [isDebugLog=false] デバッグログか。trueならdebugモード時のみ出力
+     * @param {string}  msg                message
+     * @param {boolean} [isDebugLog=false] detailed log flag
      */
     log(msg, isDebugLog = false) {
         if ((isDebugLog && this.debug) || !isDebugLog) {
@@ -271,5 +280,5 @@ class Stubon {
     }
 }
 
-export { privates };
+export { privates }; // export for test
 export default Stubon;
