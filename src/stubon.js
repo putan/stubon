@@ -3,6 +3,7 @@ import fs   from 'fs';
 import glob from 'glob';
 import url  from 'url';
 import yml  from 'yamljs';
+import chokidar from 'chokidar';
 
 import express    from 'express';
 import https      from 'https';
@@ -164,6 +165,13 @@ class Stubon {
         this.ssl   = options.ssl || false;
         this.stubs = privates.loadFiles(directory);
         this.app   = express();
+
+        // watch files
+        chokidar.watch(directory, { persistent : true })
+            .on('change', () => {
+                this.log('\n----- stub files changed -----');
+                this.stubs = privates.loadFiles(directory);
+            });
     }
 
     /**
