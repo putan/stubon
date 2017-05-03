@@ -12,7 +12,8 @@
     "build": "babel src/stubon.js --out-file lib/stubon.js",
     "watch:test": "chokidar 'src/*.js' -c 'npm test'",
     "watch:build": "chokidar 'src/*.js' -c 'npm run build'",
-    "start": "npm run watch:test & npm run watch:build",
+    "server": "node example/server.js",
+    "start": "npm run watch:test & npm run watch:build & npm run server",
     "prepublish": "npm run build"
   },
   "repository": {
