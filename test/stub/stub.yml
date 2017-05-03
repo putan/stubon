@@ -1,0 +1,63 @@
+'/aaa/get/{id}':
+    -
+        request:
+            method: 'GET'
+        response:
+            status: 200
+            body:
+                result: 'OK! aaa!'
+'/test/get/{id}':
+    -
+        request:
+            method: 'GET'
+            params:
+                id: '999'
+        response:
+            status: 200
+            body:
+                result: 'OK! param!'
+    -
+        request:
+            method: 'GET'
+            queries:
+                hoge: 'a'
+        response:
+            status: 200
+            body:
+                result: 'OK! query!'
+    -
+        request:
+            method: 'GET'
+            queries:
+                wait: 'wait'
+        options:
+            lagSec: 1
+        response:
+            status: 200
+            body:
+                result: 'OK! wait!'
+    -
+        request:
+            method: 'GET'
+        response:
+            status: 200
+            body:
+                result: 'OK!'
+'/test/post/{id}':
+    -
+        request:
+            method: 'POST'
+            headers:
+                x-method: "PUT"
+        response:
+            status: 200
+            body:
+                result: 'OK! header!'
+    -
+        request:
+            method: 'POST'
+        response:
+            status: 200
+            body:
+                result: 'OK! POST!'
+

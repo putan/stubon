@@ -169,9 +169,9 @@ describe('src/stubon.js privates.isMatchingPathAndExtractParams', () => {
 describe('src/stubon.js privates.loadFiles', () => {
     const dataProvider = {
         'load files' : {
-            dir      : './test/stub/',
+            dir      : './test/min/',
             expected : {
-                "./test/stub/data.json": {
+                "./test/min/data.json": {
                     "/bbb/get/{id}": [
                         {
                             "request": {
@@ -186,7 +186,7 @@ describe('src/stubon.js privates.loadFiles', () => {
                         }
                     ]
                 },
-                "./test/stub/data.yml": {
+                "./test/min/data.yml": {
                     "/aaa/get/{id}": [
                         {
                             "request": {

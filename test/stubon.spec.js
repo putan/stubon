@@ -5,7 +5,7 @@ import https from 'https';
 
 describe('src/stubon.js Stubon', () => {
 
-    const stubon = new Stubon('./test/sample');
+    const stubon = new Stubon('./test/stub');
     const app = stubon.server().listen(8081);
     const hostname = 'http://localhost:8081';
 
@@ -87,7 +87,7 @@ describe('src/stubon.js Stubon', () => {
 
 describe('src/stubon.js Stubon ssl&debug', () => {
     it('ssl', (done) => {
-        const stubon = new Stubon('./test/sample', {
+        const stubon = new Stubon('./test/stub', {
             ssl   : true,
             debug : true,
         });
