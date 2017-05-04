@@ -11,7 +11,7 @@ $ npm i -D stubon
 
 ## 1. Make source file by JSON or YAML or both.
 When "http request" includes all condition that written under "request", value returned that under correspond "response.body".
-[Sample is here](https://github.com/putan/stubon/blob/master/test/sample/stub.yml).
+[Sample is here](https://github.com/putan/stubon/blob/master/example/stub/stub.yml).
 
 ```js
 // ./dev/src/dummy.yml
