@@ -44,12 +44,7 @@ const privates = {
      */
     isSubsetObject : (whole, part) => {
         const changes = deep.diff(whole, part) || [];
-        for (const change of changes) {
-            if (change.kind !== 'D') {
-                return false;
-            }
-        }
-        return true;
+        return Boolean(!changes.find(element => element.kind !== 'D'));
     },
 
     /**
@@ -73,17 +68,20 @@ const privates = {
         const stubDirs  = stubPath.split('/');
         const reqDirs   = reqPath.split('/');
         let reqParams   = {};
-        let isMatch     = true;
+        let isMatch;
         if (stubDirs.length === reqDirs.length) {
-            for (const j of stubDirs.keys()) {
-                if (privates.isPlaceholder(stubDirs[j])) {
-                    reqParams[stubDirs[j].slice(1, -1)] = reqDirs[j];
-                } else if (stubDirs[j] !== reqDirs[j]) {
-                    isMatch   = false;
-                    reqParams = {};
-                    break;
+            isMatch = stubDirs.every((stubDir, j) => {
+                const reqDir = reqDirs[j];
+                if (privates.isPlaceholder(stubDir)) {
+                    reqParams[stubDir.slice(1, -1)] = reqDir;
+                    return true;
+                } else if (stubDir === reqDir) {
+                    return true;
                 }
-            }
+                // no match
+                reqParams = {};
+                return false;
+            });
         } else {
             isMatch = false;
         }
@@ -228,38 +226,43 @@ class Stubon {
                 { header : JSON.stringify(req.headers) },
             ], true);
 
-            for (const file of Object.keys(this.stubs)) {
+            const isFound = Object.keys(this.stubs).some((file) => {
                 this.log(`file: ${file}`, true);
-                for (const stubPath of Object.keys(this.stubs[file])) {
+                return Object.keys(this.stubs[file]).some((stubPath) => {
                     // check path
                     this.log(`  path: ${stubPath}`, true);
-                    const [isMatch, reqParams] =
-                        isMatchingPathAndExtractParams(stubPath, reqPath);
-                    if (isMatch) {
-                        this.log('  matched.', true);
-                        for (const i of this.stubs[file][stubPath].keys()) {
-                            this.log(`    index: ${i}`, true);
-                            const exp = this.stubs[file][stubPath][i].request;
-
-                            // check params
-                            if ((!exp.method || exp.method === req.method)
-                                && (!exp.params || isSubsetObject(reqParams, exp.params))
-                                && (!exp.queries || isSubsetObject(reqQueries, exp.queries))
-                                && (!exp.headers || isSubsetObject(req.headers, exp.headers))
-                            ) {
-                                this.log(`>> ${green}match!${reset} ${file} ${stubPath} [${i}]`);
-                                const response = this.stubs[file][stubPath][i].response;
-                                const options  = this.stubs[file][stubPath][i].options || {};
-                                const lagSec   = parseInt(options.lagSec, 10) || 0;
-                                setTimeout(() => outputJson(res, response), lagSec * 1000);
-                                return;
-                            }
-                        }
+                    const [isMatch, reqParams] = isMatchingPathAndExtractParams(stubPath, reqPath);
+                    if (!isMatch) {
+                        return false;
                     }
-                }
+
+                    this.log('  matched.', true);
+                    return this.stubs[file][stubPath].some((setting, i) => {
+                        this.log(`    index: ${i}`, true);
+                        const exp = setting.request;
+
+                        // check params
+                        if ((!exp.method || exp.method === req.method)
+                            && (!exp.params || isSubsetObject(reqParams, exp.params))
+                            && (!exp.queries || isSubsetObject(reqQueries, exp.queries))
+                            && (!exp.headers || isSubsetObject(req.headers, exp.headers))
+                        ) {
+                            this.log(`>> ${green}match!${reset} ${file} ${stubPath} [${i}]`);
+                            const response = this.stubs[file][stubPath][i].response;
+                            const options  = this.stubs[file][stubPath][i].options || {};
+                            const lagSec   = parseInt(options.lagSec, 10) || 0;
+                            setTimeout(() => outputJson(res, response), lagSec * 1000);
+                            return true;
+                        }
+
+                        return false;
+                    });
+                });
+            });
+            if (!isFound) {
+                this.log(`>> ${cyab}not found${reset}`);
+                outputNotFound(res);
             }
-            this.log(`>> ${cyab}not found${reset}`);
-            outputNotFound(res);
         } catch (e) {
             this.log(`>> ${red}error${reset}`);
             this.log(e);
