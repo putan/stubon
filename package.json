@@ -1,6 +1,6 @@
 {
   "name": "stubon",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "stubon is simple dummy api server.",
   "main": "index.js",
   "bin": {
