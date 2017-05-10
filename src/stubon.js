@@ -1,4 +1,3 @@
-import deep from 'deep-diff';
 import fs   from 'fs';
 import glob from 'glob';
 import url  from 'url';
@@ -34,17 +33,37 @@ const privates = {
     },
 
     /**
-     * 部分集合かチェック
-     * スタブ設定がリクエストの部分集合ならマッチとして使う
-     * （part ⊆ whole ならOK）
+     * is subset
+     * these values assumed to be string, since object is http request params.
      *
-     * @param {object} whole  含む方
-     * @param {object} part   含まれる方
-     * @return {boolean} 部分集合が成り立てばtrue
+     * @param {object} whole expect whole set object
+     * @param {object} part  expect subset object
+     * @return {boolean}
      */
     isSubsetObject : (whole, part) => {
-        const changes = deep.diff(whole, part) || [];
-        return Boolean(!changes.find(element => element.kind !== 'D'));
+        // wild card
+        if (part === '*' && typeof whole !== 'undefined') {
+            return true;
+        }
+        if (typeof whole !== typeof part) {
+            return false;
+        }
+        if (Array.isArray(part)) {
+            return part.every(
+                (val, index) => privates.isSubsetObject(whole[index], val),
+            );
+        } else if (part instanceof Object) {
+            return Object.keys(part).every(
+                key => privates.isSubsetObject(whole[key], part[key]),
+            );
+        }
+        // enum string
+        if (privates.isPlaceholder(String(part))) {
+            const enums = part.slice(1, -1).split('|');
+            return enums.findIndex(v => (v === whole)) !== -1;
+        }
+        // another string
+        return whole === part;
     },
 
     /**
@@ -53,7 +72,7 @@ const privates = {
      * @param {string} str
      * @return {boolean}
      */
-    isPlaceholder : str => (str.indexOf('{') === 0),
+    isPlaceholder : str => (str.substr(0, 1) === '{' && str.substr(-1) === '}'),
 
     /**
      * pathを比較する

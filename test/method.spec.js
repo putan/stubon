@@ -35,22 +35,26 @@ describe('src/stubon.js privates.isSubsetObject', () => {
     };
     const dataProvider = {
         'true  : whole = part' : {
+            whole,
             part     : whole,
             expected : true,
         },
         'true  : whole ⊇ part' : {
+            whole,
             part : {
                 test1 : 1,
             },
             expected : true,
         },
         'false : whole ⊋ part' : {
+            whole,
             part : {
                 test1 : 0,
             },
             expected : false,
         },
         'false : whole ⊆ part' : {
+            whole,
             part : {
                 test1 : 1,
                 test2 : 2,
@@ -59,18 +63,69 @@ describe('src/stubon.js privates.isSubsetObject', () => {
             expected : false,
         },
         'false : whole ∩ part = ∅' : {
+            whole,
             part : {
                 test3 : 3,
                 test4 : 4,
             },
             expected : false,
         },
+        'true  : whole ⊇ part (include wild card)' : {
+            whole,
+            part : {
+                test1 : '*',
+            },
+            expected : true,
+        },
+        'false : whole ⊆ part (include wild card)' : {
+            whole,
+            part : {
+                test1 : '*',
+                test2 : '*',
+                test3 : '*',
+            },
+            expected : false,
+        },
+        'true  : whole = part (include enum)' : {
+            whole : {
+                enum : 'TYPE_B',
+            },
+            part : {
+                enum : '{TYPE_A|TYPE_B}',
+            },
+            expected : true,
+        },
+        'false : whole ≠ part (include enum)' : {
+            whole : {
+                enum : 'TYPE_C',
+            },
+            part : {
+                enum : '{TYPE_A|TYPE_B}',
+            },
+            expected : false,
+        },
+        'various types of values and multi-level object' : {
+            whole : {
+                vStr    : 'str',
+                vArray  : ['1', '2', '3'],
+                vObject : { test1 : '1', test2 : '2' },
+                multi   : { m1 : { n1 : '1', n2 : '2' }, m2 : '3' },
+                over    : 'hoge',
+            },
+            part : {
+                vStr    : 'str',
+                vArray  : ['1', '2'],
+                vObject : { test2 : '2' },
+                multi   : { m1 : { n1 : '1' } },
+            },
+            expected : true,
+        },
     };
 
     Object.keys(dataProvider).forEach(description => {
         const data = dataProvider[description];
         it(description, () => {
-            const actual = privates.isSubsetObject(whole, data.part);
+            const actual = privates.isSubsetObject(data.whole, data.part);
             expect(actual).to.equal(data.expected);
         });
     });
