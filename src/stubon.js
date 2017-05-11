@@ -49,7 +49,7 @@ const privates = {
             return false;
         }
         if (Array.isArray(part)) {
-            return part.every(
+            return part.sort().every(
                 (val, index) => privates.isSubsetObject(whole[index], val),
             );
         } else if (part instanceof Object) {

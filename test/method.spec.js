@@ -114,7 +114,7 @@ describe('src/stubon.js privates.isSubsetObject', () => {
             },
             part : {
                 vStr    : 'str',
-                vArray  : ['1', '2'],
+                vArray  : ['2', '1'],
                 vObject : { test2 : '2' },
                 multi   : { m1 : { n1 : '1' } },
             },
