@@ -14,7 +14,7 @@
     "watch:build": "chokidar 'src/*.js' -c 'npm run build'",
     "server": "node example/server.js",
     "start": "npm run watch:test & npm run watch:build & npm run server",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build && npm run coveralls"
   },
   "repository": {
     "type": "git",
