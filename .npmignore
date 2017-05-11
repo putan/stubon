@@ -1,10 +1,10 @@
-src/
-test/
-coverage/
-gulpfile.babel.js
 .babelrc
-.codeclimate.yml
 .coveralls.yml
 .eslintrc
 .npmignore
+.nyc_output
 .travis.yml
+coverage/
+example/
+src/
+test/
