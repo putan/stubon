@@ -1,4 +1,5 @@
-'/aaa/get/{id}':
+'/aaa/get':
+    # most simply match with request path and method
     -
         request:
             method: 'GET'
@@ -7,6 +8,7 @@
             body:
                 result: 'OK! aaa!'
 '/test/get/{id}':
+    # match with a routing parameter
     -
         request:
             method: 'GET'
@@ -16,26 +18,29 @@
             status: 200
             body:
                 result: 'OK! param!'
+    # match a query in enum type
     -
         request:
             method: 'GET'
             queries:
-                hoge: 'a'
+                hoge: '{TYPE_A|TYPE_B}'
         response:
             status: 200
             body:
                 result: 'OK! query!'
+    # match a query in wild card, and delay a second
     -
         request:
             method: 'GET'
             queries:
-                wait: 'wait'
+                fuga: '*'
         options:
             lagSec: 1
         response:
             status: 200
             body:
                 result: 'OK! wait!'
+    # fallback of this path
     -
         request:
             method: 'GET'
@@ -44,6 +49,7 @@
             body:
                 result: 'OK!'
 '/test/post/{id}':
+    # match a header
     -
         request:
             method: 'POST'
