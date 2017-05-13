@@ -9,21 +9,21 @@ import https      from 'https';
 import bodyParser from 'body-parser';
 import cors       from 'cors';
 
-// ログ用
+// for log
 const red   = '\u001b[31m';
 const green = '\u001b[32m';
 const cyab  = '\u001b[36m';
 const reset = '\u001b[0m';
 
 //------------------------------------------------------------------------------
-// サポート関数
+// utilities
 //------------------------------------------------------------------------------
 const privates = {
     /**
-     * リクエストパラメータの取得
+     * get request parameters
      *
-     * @param {object} req リクエストオブジェクト
-     * @return {object} リクエストパラメーターのオブジェクト
+     * @param {Request} req request object from express
+     * @return {object}
      */
     getParams : (req) => {
         if (req.method === 'GET') {
@@ -67,7 +67,7 @@ const privates = {
     },
 
     /**
-     * 渡された文字列がプレースホルダー部分かどうか
+     * is placeholder string
      *
      * @param {string} str
      * @return {boolean}
@@ -75,13 +75,13 @@ const privates = {
     isPlaceholder : str => (str.substr(0, 1) === '{' && str.substr(-1) === '}'),
 
     /**
-     * pathを比較する
+     * compare path and get requested routing params
      *
-     * @param {string} stubPath スタブ設定のパス
-     * @param {string} reqPath  リクエストパス
+     * @param {string} stubPath path that was set to files
+     * @param {string} reqPath  path that was requested
      * @return {array}
-     *   0 : {boolean} マッチしたか
-     *   1 : {object}  抜き出したルーティングパラメータのオブジェクト
+     *   0 : {boolean} is matched
+     *   1 : {object}  requested routing params
      */
     isMatchingPathAndExtractParams : (stubPath, reqPath) => {
         const stubDirs  = stubPath.split('/');
@@ -109,7 +109,10 @@ const privates = {
     },
 
     /**
-     * 指定ディレクトリから設定を読み込む
+     * Read files under a specified directory
+     *
+     * @param {string} directory string indicating the directory
+     * @return {object}
      */
     loadFiles : (directory) => {
         const data = {};
@@ -139,17 +142,32 @@ const privates = {
         return data;
     },
 
-    // 出力系
+    /**
+     * normal output (200)
+     *
+     * @param {Response} res  response object from express
+     * @param {object}   data output data object
+     */
     outputJson : (res, data) => {
         res.writeHead(data.status, { 'Content-Type' : 'application/json; charset=utf-8' });
         res.end(JSON.stringify(data.body));
     },
 
+    /**
+     * not found output (404)
+     *
+     * @param {Response} res  response object from express
+     */
     outputNotFound : (res) => {
         res.writeHead(404);
         res.end('Not Found');
     },
 
+    /**
+     * error output (500)
+     *
+     * @param {Response} res  response object from express
+     */
     outputError : (res) => {
         res.writeHead(500);
         res.end('Server Error!');
