@@ -296,32 +296,38 @@ class Stubon {
 
             const isFound = Object.keys(this.stubs).some((file) => {
                 this.log(`file: ${file}`, true);
-                return Object.keys(this.stubs[file]).some((stubPath) => {
-                    // check path
+
+                // check path
+                let reqParams;
+                const matchedPath = Object.keys(this.stubs[file]).find((stubPath) => {
                     this.log(`  path: ${stubPath}`, true);
-                    const [isMatch, reqParams] = isMatchingPathAndExtractParams(stubPath, reqPath);
-                    if (!isMatch) {
-                        return false;
+                    const [isMatch, params] = isMatchingPathAndExtractParams(stubPath, reqPath);
+                    if (isMatch) {
+                        reqParams = params;
+                        this.log('  matched.', true);
+                        return true;
                     }
+                    return false;
+                });
+                if (!matchedPath) {
+                    return false;
+                }
 
-                    this.log('  matched.', true);
-                    return this.stubs[file][stubPath].some((setting, i) => {
-                        this.log(`    index: ${i}`, true);
-                        const exp = setting.request;
-                        const valsToCheck = [req.method, reqParams, reqQueries, req.headers];
+                // check requests
+                return this.stubs[file][matchedPath].some((setting, i) => {
+                    this.log(`    index: ${i}`, true);
+                    const exp = setting.request;
+                    const valsToCheck = [req.method, reqParams, reqQueries, req.headers];
 
-                        // check requests
-                        if (isMatchedRequest(exp, ...valsToCheck)) {
-                            this.log(`>> ${green}match!${reset} ${file} ${stubPath} [${i}]`);
-                            const response = this.stubs[file][stubPath][i].response;
-                            const options  = this.stubs[file][stubPath][i].options || {};
-                            const lagSec   = parseInt(options.lagSec, 10) || 0;
-                            setTimeout(() => outputJson(res, response), lagSec * 1000);
-                            return true;
-                        }
-
-                        return false;
-                    });
+                    if (isMatchedRequest(exp, ...valsToCheck)) {
+                        this.log(`>> ${green}match!${reset} ${file} ${matchedPath} [${i}]`);
+                        const response = this.stubs[file][stubPath][i].response;
+                        const options  = this.stubs[file][stubPath][i].options || {};
+                        const lagSec   = parseInt(options.lagSec, 10) || 0;
+                        setTimeout(() => outputJson(res, response), lagSec * 1000);
+                        return true;
+                    }
+                    return false;
                 });
             });
             if (!isFound) {
