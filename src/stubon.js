@@ -19,6 +19,10 @@ const reset = '\u001b[0m';
 // utilities
 //------------------------------------------------------------------------------
 const privates = {
+    //------------------------
+    // related to express
+    //------------------------
+
     /**
      * get request parameters
      *
@@ -31,6 +35,41 @@ const privates = {
         }
         return req.body;
     },
+
+    /**
+     * normal output (200)
+     *
+     * @param {Response} res  response object from express
+     * @param {object}   data output data object
+     */
+    outputJson : (res, data) => {
+        res.writeHead(data.status, { 'Content-Type' : 'application/json; charset=utf-8' });
+        res.end(JSON.stringify(data.body));
+    },
+
+    /**
+     * not found output (404)
+     *
+     * @param {Response} res  response object from express
+     */
+    outputNotFound : (res) => {
+        res.writeHead(404);
+        res.end('Not Found');
+    },
+
+    /**
+     * error output (500)
+     *
+     * @param {Response} res  response object from express
+     */
+    outputError : (res) => {
+        res.writeHead(500);
+        res.end('Server Error!');
+    },
+
+    //------------------------
+    // for searching
+    //------------------------
 
     /**
      * is subset
@@ -108,6 +147,10 @@ const privates = {
         return [isMatch, reqParams];
     },
 
+    //------------------------
+    // others
+    //------------------------
+
     /**
      * Read files under a specified directory
      *
@@ -140,37 +183,6 @@ const privates = {
         });
 
         return data;
-    },
-
-    /**
-     * normal output (200)
-     *
-     * @param {Response} res  response object from express
-     * @param {object}   data output data object
-     */
-    outputJson : (res, data) => {
-        res.writeHead(data.status, { 'Content-Type' : 'application/json; charset=utf-8' });
-        res.end(JSON.stringify(data.body));
-    },
-
-    /**
-     * not found output (404)
-     *
-     * @param {Response} res  response object from express
-     */
-    outputNotFound : (res) => {
-        res.writeHead(404);
-        res.end('Not Found');
-    },
-
-    /**
-     * error output (500)
-     *
-     * @param {Response} res  response object from express
-     */
-    outputError : (res) => {
-        res.writeHead(500);
-        res.end('Server Error!');
     },
 };
 
