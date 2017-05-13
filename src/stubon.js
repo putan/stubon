@@ -151,6 +151,19 @@ const privates = {
     // others
     //------------------------
 
+    parsers : [
+        // YAML
+        {
+            extension : 'yml',
+            parse     : file => yml.load(file),
+        },
+        // JSON
+        {
+            extension : 'json',
+            parse     : file => JSON.parse(fs.readFileSync(file, 'utf-8')),
+        },
+    ],
+
     /**
      * Read files under a specified directory
      *
@@ -160,18 +173,7 @@ const privates = {
     loadFiles : (directory) => {
         const data = {};
 
-        [
-            // YAML
-            {
-                extension : 'yml',
-                parse     : file => yml.load(file),
-            },
-            // JSON
-            {
-                extension : 'json',
-                parse     : file => JSON.parse(fs.readFileSync(file, 'utf-8')),
-            },
-        ].forEach((typeInfo) => {
+        privates.parsers.forEach((typeInfo) => {
             const files = glob.sync(`${directory}/*.${typeInfo.extension}`);
             files.forEach((file) => {
                 data[file] = {};
