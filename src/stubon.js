@@ -72,6 +72,23 @@ const privates = {
     //------------------------
 
     /**
+     * Check whether the setting matches the request
+     *
+     * @param {object} exp expected request object that configured in files
+     * @param {string} reqMethod  requested method
+     * @param {object} reqParams  requested routing parameters
+     * @param {object} reqQueries requested queries
+     * @param {object} reqHeaders requested headers
+     * @return {boolean}
+     */
+    isMatchedRequest : (exp, reqMethod, reqParams, reqQueries, reqHeaders) => (
+        (!exp.method || exp.method === reqMethod)
+        && (!exp.params || privates.isSubsetObject(reqParams, exp.params))
+        && (!exp.queries || privates.isSubsetObject(reqQueries, exp.queries))
+        && (!exp.headers || privates.isSubsetObject(reqHeaders, exp.headers))
+    ),
+
+    /**
      * is subset
      * these values assumed to be string, since object is http request params.
      *
@@ -260,8 +277,8 @@ class Stubon {
     router(req, res) {
         const {
             getParams,
+            isMatchedRequest,
             isMatchingPathAndExtractParams,
-            isSubsetObject,
             outputJson,
             outputNotFound,
             outputError,
@@ -291,13 +308,10 @@ class Stubon {
                     return this.stubs[file][stubPath].some((setting, i) => {
                         this.log(`    index: ${i}`, true);
                         const exp = setting.request;
+                        const valsToCheck = [req.method, reqParams, reqQueries, req.headers];
 
-                        // check params
-                        if ((!exp.method || exp.method === req.method)
-                            && (!exp.params || isSubsetObject(reqParams, exp.params))
-                            && (!exp.queries || isSubsetObject(reqQueries, exp.queries))
-                            && (!exp.headers || isSubsetObject(req.headers, exp.headers))
-                        ) {
+                        // check requests
+                        if (isMatchedRequest(exp, ...valsToCheck)) {
                             this.log(`>> ${green}match!${reset} ${file} ${stubPath} [${i}]`);
                             const response = this.stubs[file][stubPath][i].response;
                             const options  = this.stubs[file][stubPath][i].options || {};
