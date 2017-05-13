@@ -294,12 +294,13 @@ class Stubon {
                 { header : JSON.stringify(req.headers) },
             ], true);
 
-            const isFound = Object.keys(this.stubs).some((file) => {
-                this.log(`file: ${file}`, true);
+            const isFound = Object.keys(this.stubs).some((fileName) => {
+                this.log(`file: ${fileName}`, true);
+                const files = this.stubs[fileName];
 
                 // check path
                 let reqParams;
-                const matchedPath = Object.keys(this.stubs[file]).find((stubPath) => {
+                const matchedPath = Object.keys(files).find((stubPath) => {
                     this.log(`  path: ${stubPath}`, true);
                     const [isMatch, params] = isMatchingPathAndExtractParams(stubPath, reqPath);
                     if (isMatch) {
@@ -314,17 +315,16 @@ class Stubon {
                 }
 
                 // check requests
-                return this.stubs[file][matchedPath].some((setting, i) => {
+                return files[matchedPath].some((setting, i) => {
                     this.log(`    index: ${i}`, true);
                     const exp = setting.request;
                     const valsToCheck = [req.method, reqParams, reqQueries, req.headers];
 
                     if (isMatchedRequest(exp, ...valsToCheck)) {
-                        this.log(`>> ${green}match!${reset} ${file} ${matchedPath} [${i}]`);
-                        const response = this.stubs[file][stubPath][i].response;
-                        const options  = this.stubs[file][stubPath][i].options || {};
-                        const lagSec   = parseInt(options.lagSec, 10) || 0;
-                        setTimeout(() => outputJson(res, response), lagSec * 1000);
+                        this.log(`>> ${green}match!${reset} ${fileName} ${matchedPath} [${i}]`);
+                        const options = setting.options || {};
+                        const lagSec  = parseInt(options.lagSec, 10) * 1000 || 0;
+                        setTimeout(() => outputJson(res, setting.response), lagSec);
                         return true;
                     }
                     return false;
