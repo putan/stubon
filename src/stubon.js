@@ -217,7 +217,6 @@ const privates = {
  * @prop {boolean} ssl   ssl flag
  */
 class Stubon {
-
     /**
      * constructor
      *
