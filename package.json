@@ -46,14 +46,15 @@
   },
   "dependencies": {
     "argv": "0.0.2",
-    "body-parser": "^1.17.1",
-    "chokidar": "^1.6.1",
-    "cors": "^2.8.3",
-    "express": "^4.15.2",
+    "body-parser": "^1.18.1",
+    "chokidar": "^1.7.0",
+    "cors": "^2.8.4",
+    "express": "^4.15.4",
     "glob": "^7.1.1",
     "https": "^1.0.0",
+    "node-fetch": "^1.7.3",
     "url": "^0.11.0",
-    "yamljs": "^0.2.10"
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
