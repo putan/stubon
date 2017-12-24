@@ -322,7 +322,7 @@ class Stubon {
                     if (isMatchedRequest(exp, ...valsToCheck)) {
                         this.log(`>> ${green}match!${reset} ${fileName} ${matchedPath} [${i}]`);
                         const options = setting.options || {};
-                        const lagSec  = parseInt(options.lagSec, 10) * 1000 || 0;
+                        const lagSec  = parseInt(options.lagSec * 1000, 10) || 0;
                         setTimeout(() => outputJson(res, setting.response), lagSec);
                         return true;
                     }
