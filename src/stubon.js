@@ -104,11 +104,11 @@ const privates = {
         if (typeof whole !== typeof part) {
             return false;
         }
-        if (Array.isArray(part)) {
+        if (Array.isArray(whole) && Array.isArray(part)) {
             return part.sort().every(
                 (val, index) => privates.isSubsetObject(whole[index], val),
             );
-        } else if (part instanceof Object) {
+        } else if (whole instanceof Object && part instanceof Object) {
             return Object.keys(part).every(
                 key => privates.isSubsetObject(whole[key], part[key]),
             );
