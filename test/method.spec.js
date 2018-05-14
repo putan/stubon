@@ -104,6 +104,15 @@ describe('src/stubon.js privates.isSubsetObject', () => {
             },
             expected : false,
         },
+        'false : Can also determine null' : {
+            whole : {
+                hogeArray : null,
+            },
+            part : {
+                hogeArray : [1],
+            },
+            expected : false,
+        },
         'various types of values and multi-level object' : {
             whole : {
                 vStr    : 'str',
