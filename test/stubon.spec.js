@@ -5,12 +5,14 @@ import https from 'https';
 import sinon from 'sinon';
 
 describe('src/stubon.js Stubon', () => {
+    let stubon;
+    afterEach(() => stubon.close());
 
     describe('request', () => {
         let app;
         let hostname;
         beforeEach(() => {
-            const stubon = new Stubon('./test/stub');
+            stubon = new Stubon('./test/stub');
             app = stubon.server().listen(8081);
             hostname = 'http://localhost:8081';
         });
@@ -101,7 +103,7 @@ describe('src/stubon.js Stubon', () => {
         const stub = sinon.stub(privates, 'getParams').callsFake(
             () => { throw new Error('dummy error'); }
         );
-        const stubon = new Stubon('./test/stub');
+        stubon = new Stubon('./test/stub');
         const app = stubon.server().listen(8083);
         const hostname = 'http://localhost:8083';
         fetch(`${hostname}/test/get/1`)
@@ -118,7 +120,7 @@ describe('src/stubon.js Stubon', () => {
     });
 
     it('ssl', (done) => {
-        const stubon = new Stubon('./test/stub', {
+        stubon = new Stubon('./test/stub', {
             ssl   : true,
             debug : true,
         });

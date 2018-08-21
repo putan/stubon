@@ -234,11 +234,15 @@ class Stubon {
         this.app   = express();
 
         // watch files
-        chokidar.watch(directory, { persistent : true })
+        this.wather = chokidar.watch(directory, { persistent : true })
             .on('change', () => {
                 this.log('\n----- stub files changed -----');
                 this.stubs = privates.loadFiles(directory);
             });
+    }
+
+    close() {
+        this.wather.close();
     }
 
     /**
