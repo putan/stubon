@@ -19,12 +19,18 @@ argv.option([
     {
         name: 'ssl',
         type : 'boolean',
-        description :'optional. when you wont to make a server in ssl.'
+        description :'optional. when you want to make a server in ssl.'
+    },
+    {
+        name: 'hostname',
+        type : 'string',
+        description :'optional. when you want to use hostname other than "localhost".',
+        example : 'stubon -s ./src -p 8080 --hostname="127.0.0.1"'
     },
     {
         name: 'debug',
         type : 'boolean',
-        description :'optional. when you wont to output debug logs.'
+        description :'optional. when you want to output debug logs.'
     },
 ]);
 var args = argv.run().options;
@@ -40,4 +46,5 @@ if (args.ssl) {
 if (args.debug) {
     options.debug = true;
 }
-(new Stubon(args.source, options)).server().listen(args.port);
+var hostname = args.hostname || 'localhost';
+(new Stubon(args.source, options)).server().listen(args.port, hostname);

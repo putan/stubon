@@ -108,7 +108,8 @@ const privates = {
             return part.sort().every(
                 (val, index) => privates.isSubsetObject(whole[index], val),
             );
-        } else if (whole instanceof Object && part instanceof Object) {
+        }
+        if (whole instanceof Object && part instanceof Object) {
             return Object.keys(part).every(
                 key => privates.isSubsetObject(whole[key], part[key]),
             );
@@ -150,7 +151,8 @@ const privates = {
                 if (privates.isPlaceholder(stubDir)) {
                     reqParams[stubDir.slice(1, -1)] = reqDir;
                     return true;
-                } else if (stubDir === reqDir) {
+                }
+                if (stubDir === reqDir) {
                     return true;
                 }
                 // no match
@@ -232,11 +234,15 @@ class Stubon {
         this.app   = express();
 
         // watch files
-        chokidar.watch(directory, { persistent : true })
+        this.wather = chokidar.watch(directory, { persistent : true })
             .on('change', () => {
                 this.log('\n----- stub files changed -----');
                 this.stubs = privates.loadFiles(directory);
             });
+    }
+
+    close() {
+        this.wather.close();
     }
 
     /**
