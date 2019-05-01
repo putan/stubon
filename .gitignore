@@ -2,3 +2,6 @@
 !/lib/.gitkeep
 /coverage
 /node_modules
+*.swp
+yarn-error.log
+.nyc_output

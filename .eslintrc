@@ -1,5 +1,9 @@
 {
-  extends: "airbnb",
+  extends: "eslint:recommended",
+  env: {
+    node: true
+  },
+  parser: "babel-eslint",
   rules: {
     indent: ["error", 4],
     key-spacing: ['error', {
@@ -7,6 +11,7 @@
       afterColon  : true,
       align       : colon
     }],
+    no-console: "warn",
     no-multi-spaces: ["error", {
       exceptions: {
         AssignmentExpression : true,
@@ -17,7 +22,6 @@
     }],
     no-use-before-define: ["error", {
       functions : false
-    }],
-    react/require-extension: "off"
+    }]
   }
 }
